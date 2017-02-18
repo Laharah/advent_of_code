@@ -43,8 +43,8 @@ class Grid:
     def __str__(self):
         end = max(self.data)
         rows = []
-        for row in range(end[0]):
-            r = ''.join('#' if self.data[row, col] else '.' for col in range(end[1]))
+        for row in range(end[0] + 1):
+            r = ''.join('#' if self.data[row, col] else '.' for col in range(end[1] + 1))
             rows.append(r)
         return '\n'.join(rows)
 
@@ -54,6 +54,6 @@ grid = Grid(input(18))
 for _ in range(100):
     grid.evolve()
     assert all(grid[c] for c in grid.corners)
-    print(grid)
+    print(grid, end='\n\n')
 
 print(sum(grid.data.values()))
