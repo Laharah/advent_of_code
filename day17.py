@@ -23,4 +23,16 @@ for mask in range(1, 1 << len(coins)):
             num_fewest += 1
         total += 1
 
+def recursive_solution(coins, target):
+    if target == 0:
+        return 1
+    if target < 0:
+        return 0
+
+    solutions = 0
+    for coin in coins:
+        solutions += recursive_solution(coins-{coin}, target-coin)
+    return solutions
+
 print(total, fewest, num_fewest)
+print(recursive_solution(set(coins), target))
