@@ -1,6 +1,7 @@
 import itertools
 from collections import Counter
 
+
 def incremented_password(seed=None):
     if not seed:
         seed = 'a'
@@ -8,12 +9,12 @@ def incremented_password(seed=None):
     order = list('abcdefghijklmnopqrstuvwxyz')
     _next = {}
     for i, c in enumerate(order):
-        _next[order[i-1]] = c
+        _next[order[i - 1]] = c
     current = list(reversed(seed))
     while True:
         current[0] = _next[current[0]]
         if current[0] == 'a':
-            carry  = True
+            carry = True
         else:
             carry = False
         if carry:
@@ -39,18 +40,19 @@ for pswd in incremented_password('vzbxkghb'):
             break
         o = ord(c)
         try:
-            if ord(pswd[i+1]) == o+1 and ord(pswd[i + 2]) == o + 2:
+            if ord(pswd[i + 1]) == o + 1 and ord(pswd[i + 2]) == o + 2:
                 ascending = True
         except IndexError:
             pass
 
         try:
-            if c == pswd[i+1]:
+            if c == pswd[i + 1]:
                 pairs += 1
-                if c == pswd[i-1] and c != pswd[i-2]:
+                if c == pswd[i - 1] and c != pswd[i - 2]:
                     pairs -= 1
         except IndexError:
             pass
 
-    if all((no_banned, ascending, pairs>1)):
+    if all((no_banned, ascending, pairs > 1)):
         print(pswd)
+        exit()
