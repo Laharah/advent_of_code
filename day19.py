@@ -23,28 +23,28 @@ def parse(infile):
 
 
 def get_possible_expansions(mappings, current):
-    part = ''
     expansions = set()
     for i, c in enumerate(current):
-        for j in range(i, min((i+15, len(current)))):
-            if part in mappings:
-                break
+        for j in range(min((i+15, len(current))), i-1, -1):
+            part = current[i:j]
+            try:
+                expanded = mappings[part]
+            except KeyError:
+                pass
             else:
-                part += current[j]
-        try:
-            expanded = mappings[part]
-        except KeyError:
-            part = ''
+                for e in expanded:
+                    expansions.add(''.join((current[:i], e, current[i+ len(part):])))
+
+    l = []
+    for x in expansions:
+        if 'e' in x and x != 'e':
             continue
-        for e in expanded:
-            expansions.add(''.join((current[:i], e, current[i+ len(part):])))
-        part = ''
-    return expansions
+        else:
+            l.append(x)
+    return sorted(l, key=len)
 
 
 def dist_to_goal(goal, current):
-    if current > goal:
-        return 1000000
     diff = 0
     for a, b in zip(goal, current):
         if a != b:
@@ -52,32 +52,35 @@ def dist_to_goal(goal, current):
 
     return diff + abs(len(goal)-len(current))
 
+def reverse_mappings(mappings):
+    original = mappings
+    mappings = {}
+    for k, expansions in original.items():
+        for e in expansions:
+            mappings[e] = k
+    return mappings
+
+
 
 if __name__ == '__main__':
-    mappings, goal = parse(input(19))
-    pprint(mappings)
-    print(goal)
-
-    # goal = 'HOHOHO'
+    mappings, start = parse(input(19))
+    print(start)
+    #
+    # start = 'HOHOHOHHH'
     # mappings = {
     # 'H': {'HO','OH'},
     # 'O': {'HH'},
     # 'e': {'H', 'O'}
     # }
 
-    print(len(get_possible_expansions(mappings, goal)))
+    mappings = reverse_mappings(mappings)
+    pprint(mappings)
 
-    dist_to_goal = partial(dist_to_goal, goal)
+    # print(get_possible_expansions(mappings, start))
+
     moves = partial(get_possible_expansions, mappings)
 
-    def bfestimate(node):
-        if len(node) > len(goal):
-            return 1000
-        elif node == goal:
-            return 0
-        else:
-            return 1
 
-    path = astar_search('e', h_func=bfestimate, moves_func=moves)
+    path = astar_search(start, h_func=bfs('e'), moves_func=moves)
     print(path)
     print(len(path))
