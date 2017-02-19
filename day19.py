@@ -25,7 +25,7 @@ def parse(infile):
 def get_possible_expansions(mappings, current):
     expansions = set()
     for i, c in enumerate(current):
-        for j in range(min((i+15, len(current))), i-1, -1):
+        for j in range(min((i + 15, len(current))), i - 1, -1):
             part = current[i:j]
             try:
                 expanded = mappings[part]
@@ -33,7 +33,7 @@ def get_possible_expansions(mappings, current):
                 pass
             else:
                 for e in expanded:
-                    expansions.add(''.join((current[:i], e, current[i+ len(part):])))
+                    expansions.add(''.join((current[:i], e, current[i + len(part):])))
 
     l = []
     for x in expansions:
@@ -48,9 +48,10 @@ def dist_to_goal(goal, current):
     diff = 0
     for a, b in zip(goal, current):
         if a != b:
-            diff +=1
+            diff += 1
 
-    return diff + abs(len(goal)-len(current))
+    return diff + abs(len(goal) - len(current))
+
 
 def reverse_mappings(mappings):
     original = mappings
@@ -60,6 +61,33 @@ def reverse_mappings(mappings):
             mappings[e] = k
     return mappings
 
+
+def greedy_dfs(mappings, start):
+    total = 0
+    replacements = []
+    path = []
+    last = ''
+    for compressed, v in mappings.items():
+        for expanded in v:
+            replacements.append((expanded, compressed))
+    replacements.sort(key=lambda x: -len(x[0]))
+    print(replacements)
+    while start != 'e':
+        for expanded, compressed in replacements:
+            if expanded in start:
+                start = start.replace(expanded, compressed, 1)
+                path.append(start)
+                total += 1
+                break
+        if start == last:
+            print(start)
+            exit()
+            last = start
+        if total % 1000 == 0:
+            print(total)
+        if total % 10000 == 0:
+            print(start)
+    return total, path
 
 
 if __name__ == '__main__':
@@ -73,14 +101,14 @@ if __name__ == '__main__':
     # 'e': {'H', 'O'}
     # }
 
-    mappings = reverse_mappings(mappings)
+    # mappings = reverse_mappings(mappings)
     pprint(mappings)
 
     # print(get_possible_expansions(mappings, start))
 
     moves = partial(get_possible_expansions, mappings)
 
-
-    path = astar_search(start, h_func=bfs('e'), moves_func=moves)
-    print(path)
+    # path = astar_search(start, h_func=bfs('e'), moves_func=moves)
+    total, path = greedy_dfs(mappings, start)
+    print(total)
     print(len(path))
