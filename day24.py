@@ -1,45 +1,19 @@
-from my_utils.iteration import powerset
-from functools import reduce
-from itertools import chain
-from pprint import pprint
-from common import input
-
-
-test = list(chain(range(1, 6), range(7, 12)))
-
-target = sum(test) // 3
-
-
 def distribute(items, groups, target=None):
-    'distribute items amongs x even valued groups'
-    target = sum(items) // groups if not target else target
-    s_items = frozenset(items)
-    # if groups == 1:
-    #     if sum(items) == target:
-    #         yield frozenset([frozenset(items)])
-    #     return
-    if groups == 2:
-        for s in powerset(items):
-            if sum(s) != target:
-                continue
-            yield frozenset([frozenset(items)])
+    'finds every way you can make an evenly distributable subsection'
+    target = target if target else sum(items) // groups
+    if groups == 1:
+        if sum(items) == target:
+            yield items
             return
-    for s in powerset(items):
-        if sum(s) != target:
-            continue
-        for solution in distribute(s_items-set(s), groups -1, target=target):
-            yield frozenset([frozenset(s)]) | solution
-
-def distribute3(items):
-    'finds every way you can make an evenly distiputable 1/3rd'
-    target = sum(items) // 3
-    s_items = set(items)
+    smallest_len = len(items)
     for way in all_ways(target, items):
-        remaining = s_items - way
-        # if any(s.issubset(remaining) for s in valid_solutions):
-        #     valid_solutions.add(way)
-        if any(all_ways(target, remaining)):
+        if len(way) > smallest_len:
+            continue
+        remaining = items - way
+        if any(distribute(remaining, groups - 1, target)) and len(way) <= smallest_len:
+            smallest_len = len(way)
             yield way
+
 
 def all_ways(target, items):
     'yield every set of items that sum to target from items'
@@ -56,44 +30,41 @@ def all_ways(target, items):
         for s in all_ways(target - coin, items - used):
             yield s | {coin}
 
+
 def running_min(key=None):
     if not key:
-        key = lambda i:i
+        key = lambda i: i
     _min = yield
-    yield _min
     k_min = key(_min)
     while True:
-        sent = yield
+        sent = yield _min
         ks = key(sent)
         if ks < k_min:
             _min = sent
             k_min = ks
-        yield _min
 
 
+if __name__ == '__main__':
+    from itertools import chain
+    from common import input
+    from functools import reduce
 
+    nums = set(int(n) for n in input(24))
+    test = set(chain(range(1, 6), range(7, 12)))
 
-product = lambda s: reduce(lambda a,b: a*b, s)
-nums = set(int(n) for n in input(24))
-# max_l = 0
-# for i, w in enumerate(all_ways(sum(nums)//3, nums)):
-#     _min = c_min.send(w)
-#     if not i%1000:
-#         max_l = max(max_l, len(str(w)))
-#         print('{:{max_l}} {}'.format(str(w), str(_min), max_l=max_l+1))
-# print(f'there are {i} possible solutions')
+    possibles = distribute(nums, 4)
+    product = lambda s: reduce(lambda a, b: a * b, s)
+    c_min = running_min(key=lambda s: (len(s), product(s)))
+    next(c_min)
+    max_l = 0
+    p_min = 0
+    for i, p in enumerate(possibles):
+        _min = c_min.send(p)
+        if not i % 1000 or p_min != _min:
+            max_l = max(max_l, len(str(p)))
+            print('{:{max_l}} {}'.format(str(p), str(_min), max_l=max_l + 1))
+            p_min = _min
+    print('{} total solutions', i)
+    print(_min)
 
-possibles = distribute3(nums)
-
-c_min = running_min(key=lambda s:(len(s), product(s)))
-next(c_min)
-max_l = 0
-for i, p in enumerate(possibles):
-    _min = c_min.send(p)
-    if not i%1000:
-        max_l = max(max_l, len(str(p)))
-        print('{:{max_l}} {}'.format(str(p), str(_min), max_l=max_l+1))
-print(f'{i} total solutions')
-# possibles = distribute3(set(test))
-
-print('solution: ', _min, product(_min))
+    print('solution: ', _min, product(_min))
