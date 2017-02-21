@@ -30,23 +30,70 @@ def distribute(items, groups, target=None):
         for solution in distribute(s_items-set(s), groups -1, target=target):
             yield frozenset([frozenset(s)]) | solution
 
+def distribute3(items):
+    'finds every way you can make an evenly distiputable 1/3rd'
+    target = sum(items) // 3
+    s_items = set(items)
+    for way in all_ways(target, items):
+        remaining = s_items - way
+        # if any(s.issubset(remaining) for s in valid_solutions):
+        #     valid_solutions.add(way)
+        if any(all_ways(target, remaining)):
+            yield way
 
-possibles = set(distribute([int(n) for n in input(24)], 3))
-# possibles = set(distribute(test, 3))
+def all_ways(target, items):
+    'yield every set of items that sum to target from items'
+    if target == 0:
+        yield set()
+        return
+    if target < 0:
+        return
+    if not items:
+        return
+    used = set()
+    for coin in items:
+        used.add(coin)
+        for s in all_ways(target - coin, items - used):
+            yield s | {coin}
 
-for s in possibles:
-    print(s)
+def running_min(key=None):
+    if not key:
+        key = lambda i:i
+    _min = yield
+    yield _min
+    k_min = key(_min)
+    while True:
+        sent = yield
+        ks = key(sent)
+        if ks < k_min:
+            _min = sent
+            k_min = ks
+        yield _min
 
-cleaned = []
-for solution in possibles:
-    s = []
-    for part in solution:
-        part = tuple(sorted(part))
-        s.append(part)
-    cleaned.append(tuple(sorted(s, key=len)))
-cleaned = sorted(cleaned, key=lambda s: tuple(len(p) for p in s))
-smallest = len(cleaned[0][0])
-cleaned = [s for s in cleaned if len(s[0]) == smallest]
-pprint(cleaned)
-product = lambda i: reduce(lambda a, b: a*b, i)
-print(min(cleaned, key=lambda s: product(s[0])))
+
+
+
+product = lambda s: reduce(lambda a,b: a*b, s)
+nums = set(int(n) for n in input(24))
+# max_l = 0
+# for i, w in enumerate(all_ways(sum(nums)//3, nums)):
+#     _min = c_min.send(w)
+#     if not i%1000:
+#         max_l = max(max_l, len(str(w)))
+#         print('{:{max_l}} {}'.format(str(w), str(_min), max_l=max_l+1))
+# print(f'there are {i} possible solutions')
+
+possibles = distribute3(nums)
+
+c_min = running_min(key=lambda s:(len(s), product(s)))
+next(c_min)
+max_l = 0
+for i, p in enumerate(possibles):
+    _min = c_min.send(p)
+    if not i%1000:
+        max_l = max(max_l, len(str(p)))
+        print('{:{max_l}} {}'.format(str(p), str(_min), max_l=max_l+1))
+print(f'{i} total solutions')
+# possibles = distribute3(set(test))
+
+print('solution: ', _min, product(_min))
