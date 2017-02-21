@@ -18,10 +18,11 @@ class State:
         'Recharge':(('mana', 101), ())
     }
 
-    MANA_COST = {k: v[0][1]*-1 for k, v in PLAYER_MOVES.items()}
+    MANA_COST = {k: v[0][1] * -1 for k, v in PLAYER_MOVES.items()}
     MANA_COST['Boss Attack'] = 0
 
-    def __init__(self, hp=50,
+    def __init__(self,
+                 hp=50,
                  mana=500,
                  armor=0,
                  boss_hp=58,
@@ -93,29 +94,36 @@ class State:
                 new_effects.append((name, time))
         self.effects = new_effects
 
+    def compact_state(self):
+        t = (self.hp, self.mana, self.armor, self.boss_hp, self.boss_damage,
+             tuple(sorted(self.effects)), self.turn)
+        return t
+
     def __eq__(self, other):
-        return self is other
+        return self.compact_state() == other.compact_state()
 
     def __lt__(self, other):
         return id(self) < id(other)
 
     def __hash__(self):
-        return id(self)
+        return hash(self.compact_state())
 
     def __repr__(self):
-        st = '{}(hp={s.hp}, mana={s.mana}, armor={s.armor}, boss_hp={s.boss_hp}, boss_damage={s.boss_damage}, effects={s.effects}, turn={s.turn})'
+        st = ('{}(hp={s.hp}, mana={s.mana}, armor={s.armor}, boss_hp={s.boss_hp},'
+              ' boss_damage={s.boss_damage}, effects={s.effects}, turn={s.turn})')
         return st.format(self.__class__.__name__, s=self)
 
 
 def estimate_cost(state):
     'ideal cost, sum of manacost of cheapest spell to kill boss'
-    if state.boss_hp <= 0 and state.hp > 0 :
+    if state.boss_hp <= 0 and state.hp > 0:
         return 0
     # else: # do bfs
     #     return 1
 
     # assume poisoned, and eating a magic missile each turn
-    return state.boss_hp//7 * 53 or 53
+    return state.boss_hp // 7 * 53 or 53
+
 
 def astar_search(start, h_func, moves_func):
     """
@@ -147,26 +155,27 @@ def astar_search(start, h_func, moves_func):
                 parent[neighbor] = node
     return None
 
+
 if __name__ == '__main__':
-    s = State(hp=10, mana=250, boss_hp=13, boss_damage=8)
-    assert s.get_moves() == list(s.PLAYER_MOVES), s.get_moves()
-    s = s.after('Poison')
-    assert s.mana == 77, s.mana
-    assert s.effects == [('Poison', 5)], s
-    assert s.boss_hp == 10
-    assert s.get_moves() == ['Boss Attack']
-    s = s.after('Boss Attack')
-    assert s.hp == 1
-    assert s.boss_hp == 7
-    assert s.turn
-    assert s.get_moves() == ['Magic Missile', 'Drain']
+    # tests
+    # s = State(hp=10, mana=250, boss_hp=13, boss_damage=8)
+    # assert s.get_moves() == list(s.PLAYER_MOVES), s.get_moves()
+    # s = s.after('Poison')
+    # assert s.mana == 77, s.mana
+    # assert s.effects == [('Poison', 5)], s
+    # assert s.boss_hp == 10
+    # assert s.get_moves() == ['Boss Attack']
+    # s = s.after('Boss Attack')
+    # assert s.hp == 1
+    # assert s.boss_hp == 7
+    # assert s.turn
+    # assert s.get_moves() == ['Magic Missile', 'Drain']
 
     real = State(hp=50, mana=500, boss_hp=58, boss_damage=9)
     test = State(hp=10, mana=250, boss_hp=13, boss_damage=8)
     moves = lambda s: s.get_moves()
 
-
-    path, moves, cost= astar_search(real, h_func=estimate_cost, moves_func=moves)
+    path, moves, cost = astar_search(real, h_func=estimate_cost, moves_func=moves)
     total = 0
     for p in path:
         try:
