@@ -58,13 +58,12 @@ if __name__ == '__main__':
     next(c_min)
     max_l = 0
     p_min = 0
+    _min = None
     for i, p in enumerate(possibles):
         _min = c_min.send(p)
         if not i % 1000 or p_min != _min:
             max_l = max(max_l, len(str(p)))
             print('{:{max_l}} {}'.format(str(p), str(_min), max_l=max_l + 1))
             p_min = _min
-    print('{} total solutions', i)
-    print(_min)
-
+    print('{}+ total solutions'.format(i))
     print('solution: ', _min, product(_min))
