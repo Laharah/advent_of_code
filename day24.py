@@ -48,11 +48,17 @@ if __name__ == '__main__':
     from itertools import chain
     from common import input
     from functools import reduce
+    import sys
+
+    try:
+        groups = int(sys.argv[1])
+    except IndexError:
+        groups = 4
 
     nums = set(int(n) for n in input(24))
     test = set(chain(range(1, 6), range(7, 12)))
 
-    possibles = distribute(nums, 4)
+    possibles = distribute(nums, groups)
     product = lambda s: reduce(lambda a, b: a * b, s)
     c_min = running_min(key=lambda s: (len(s), product(s)))
     next(c_min)
