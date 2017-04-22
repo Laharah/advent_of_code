@@ -1,4 +1,4 @@
-from bitarray import bitarray
+from bitarray import Bitarray
 
 def get_data(size, seed):
     while len(seed) < size:
@@ -9,7 +9,7 @@ def get_data(size, seed):
     return seed[:size]
 
 def get_checksum(data):
-    cs = bitarray(0)
+    cs = Bitarray(0)
     i = iter(data)
     for a in i:
         try:
@@ -28,5 +28,6 @@ def get_checksum(data):
         return cs
 
 if __name__ == '__main__':
-    data = get_data(35651584, bitarray('11100010111110100'))
+    data = get_data(35651584, Bitarray('11100010111110100'))
+    print('should be 01010001101011001')
     print(get_checksum(data))
