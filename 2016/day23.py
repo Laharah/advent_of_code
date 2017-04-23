@@ -20,9 +20,9 @@ def parse_instructions(instruction_set, instructions):
 def execute(register, instruction_set, instructions):
     instructions = parse_instructions(instruction_set, instructions)
     while register['i'] < len(instructions):
-        print(register)
+        # print(register)
         inst, args = instructions[register['i']]
-        print(inst, *args) 
+        # print(inst, *args) 
         try:
             if inst == 'tgl':
                 instruction_set[inst](*args, instructions, register['i'])
@@ -56,7 +56,7 @@ if __name__ == '__main__':
         register['i'] += resolve(y) - 1 if resolve(x) != 0 else 0
 
     def tgl(x, instructions, self_index):
-        index = register['i'] + resolve(x) 
+        index = register['i'] + resolve(x)
         inst, args = instructions[index]
 
         if inst == 'inc':
@@ -72,7 +72,6 @@ if __name__ == '__main__':
         # print(instructions[index], ' at ', index, ' changed to ', [inst, args])
         instructions[index] = [inst, args]
 
-
     instruction_set = {
         'cpy': cpy,
         'inc': inc,
@@ -86,7 +85,7 @@ if __name__ == '__main__':
         'c': 0,
         'd': 0,
         'i': 0,
-        }
+    }
 
     register = execute(register, instruction_set, Input(23))
     print(register)
