@@ -26,10 +26,8 @@ if __name__ == '__main__':
             break
         states.add(state)
 
-
     goal = tuple(mem)
     for c, state in enumerate(distribute_cycle(mem), 1):
         if state == goal:
             print(c)
             break
-

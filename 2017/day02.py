@@ -13,7 +13,6 @@ for line in matrix:
     total += max(line) - min(line)
 print(total)
 
-
 total = 0
 for row in matrix:
     for a, b in itertools.combinations(row, 2):
